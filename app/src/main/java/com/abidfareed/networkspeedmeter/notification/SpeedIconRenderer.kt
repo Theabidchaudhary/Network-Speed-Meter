@@ -14,9 +14,10 @@ import android.graphics.Typeface
  * This is the mechanism that makes readable text appear as a status-bar icon without root:
  * there is no other public API surface for it (see TECHNICAL_FEASIBILITY.md).
  *
- * Layout: the number is the dominant element (as large and bold as the icon slot allows) with
- * the unit stacked underneath in smaller text, matching how legible reference apps do it -
- * cramming a value and unit onto one line is what makes text unreadable at status-bar scale.
+ * Layout: the number is the dominant element, unit stacked below it. Text size is derived from
+ * the *widest plausible* value for the current decimal-places setting (not the actual value
+ * being drawn), so digits don't visibly grow/shrink frame to frame as the reading changes -
+ * only the drawn string does. A condensed bold face is used so more digits fit at a given size.
  */
 object SpeedIconRenderer {
 
@@ -26,14 +27,21 @@ object SpeedIconRenderer {
     /**
      * Single-metric layout: big bold value on top, unit stacked below.
      * @param arrow optional direction glyph ("↓"/"↑") drawn small, above the value.
+     * @param decimalPlaces used only to size the widest-case template, not to format [value].
      */
-    fun render(value: String, unit: String, arrow: String? = null, sizeScale: Float = 1.0f): Bitmap {
+    fun render(
+        value: String,
+        unit: String,
+        arrow: String? = null,
+        decimalPlaces: Int = 0,
+        sizeScale: Float = 1.0f
+    ): Bitmap {
         val bitmap = Bitmap.createBitmap(CANVAS_SIZE, CANVAS_SIZE, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val paint = basePaint()
 
-        val valueSize = fitTextSize(paint, value, CANVAS_SIZE * 0.94f, CANVAS_SIZE * 0.62f * sizeScale)
-        val unitSize = valueSize * 0.42f
+        val valueSize = fitTextSize(paint, widestValueTemplate(decimalPlaces), CANVAS_SIZE * 0.94f, CANVAS_SIZE * 0.66f * sizeScale)
+        val unitSize = valueSize * 0.56f
         val arrowSize = valueSize * 0.34f
 
         paint.textSize = unitSize
@@ -70,17 +78,18 @@ object SpeedIconRenderer {
         downUnit: String,
         upValue: String,
         upUnit: String,
+        decimalPlaces: Int = 0,
         sizeScale: Float = 1.0f
     ): Bitmap {
         val bitmap = Bitmap.createBitmap(CANVAS_SIZE, CANVAS_SIZE, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val paint = basePaint()
 
+        val template = "↓${widestValueTemplate(decimalPlaces)}MB"
+        paint.textSize = fitTextSize(paint, template, CANVAS_SIZE * 0.94f, CANVAS_SIZE * 0.46f * sizeScale)
+
         val line1 = "↓$downValue$downUnit"
         val line2 = "↑$upValue$upUnit"
-        val widest = if (line1.length >= line2.length) line1 else line2
-        paint.textSize = fitTextSize(paint, widest, CANVAS_SIZE * 0.94f, CANVAS_SIZE * 0.44f * sizeScale)
-
         val lineHeight = paint.descent() - paint.ascent()
         val totalHeight = lineHeight * 2
         var y = CANVAS_SIZE / 2f - totalHeight / 2f - paint.ascent()
@@ -102,9 +111,14 @@ object SpeedIconRenderer {
         return bitmap
     }
 
+    /** Worst-case digit string for a given decimal-places setting, e.g. "1023" or "1023.99". */
+    private fun widestValueTemplate(decimalPlaces: Int): String =
+        if (decimalPlaces <= 0) "1023" else "1023." + "9".repeat(decimalPlaces.coerceAtMost(2))
+
     private fun basePaint(): Paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.SUBPIXEL_TEXT_FLAG).apply {
         color = -1 // opaque white; only alpha coverage is used by the OS
-        typeface = Typeface.create(Typeface.DEFAULT_BOLD, Typeface.BOLD)
+        // Condensed face: narrower per-glyph width lets more digits fit at a given text size.
+        typeface = Typeface.create("sans-serif-condensed", Typeface.BOLD)
         textAlign = Paint.Align.CENTER
     }
 

@@ -15,7 +15,7 @@ data class AppSettings(
     val displayMode: DisplayMode = DisplayMode.DOWNLOAD_ONLY,
     val unit: SpeedUnit = SpeedUnit.AUTO,
     val updateIntervalMillis: Long = 1000L,
-    val decimalPlaces: Int = 1,
+    val decimalPlaces: Int = 0,
     val showWhenZero: Boolean = true,
     val networkFilter: NetworkFilter = NetworkFilter.BOTH,
     val theme: AppTheme = AppTheme.SYSTEM,

@@ -133,7 +133,8 @@ class SpeedMeterService : LifecycleService() {
             SpeedIconRenderer.renderIdle()
         } else {
             notificationHelper.iconForSpeeds(
-                effectiveDown, effectiveUp, settings.displayMode, formattedDown, formattedUp, settings.textSize
+                effectiveDown, effectiveUp, settings.displayMode, formattedDown, formattedUp,
+                settings.textSize, settings.decimalPlaces
             )
         }
 

@@ -35,7 +35,7 @@ class SettingsRepository(private val context: Context) {
                 ?: DisplayMode.DOWNLOAD_ONLY,
             unit = prefs[Keys.UNIT]?.let { runCatching { SpeedUnit.valueOf(it) }.getOrNull() } ?: SpeedUnit.AUTO,
             updateIntervalMillis = prefs[Keys.INTERVAL_MS] ?: 1000L,
-            decimalPlaces = prefs[Keys.DECIMALS] ?: 1,
+            decimalPlaces = prefs[Keys.DECIMALS] ?: 0,
             showWhenZero = prefs[Keys.SHOW_WHEN_ZERO] ?: true,
             networkFilter = prefs[Keys.NETWORK_FILTER]?.let { runCatching { NetworkFilter.valueOf(it) }.getOrNull() }
                 ?: NetworkFilter.BOTH,

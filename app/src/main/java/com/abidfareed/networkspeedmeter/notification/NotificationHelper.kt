@@ -79,7 +79,8 @@ class NotificationHelper(private val context: Context) {
         displayMode: DisplayMode,
         formattedDown: Pair<String, String>,
         formattedUp: Pair<String, String>,
-        textSize: TextSize = TextSize.MEDIUM
+        textSize: TextSize = TextSize.MEDIUM,
+        decimalPlaces: Int = 0
     ): Bitmap {
         val scale = when (textSize) {
             TextSize.SMALL -> 0.8f
@@ -90,11 +91,13 @@ class NotificationHelper(private val context: Context) {
             DisplayMode.DOWNLOAD_ONLY -> SpeedIconRenderer.render(
                 value = formattedDown.first,
                 unit = formattedDown.second,
+                decimalPlaces = decimalPlaces,
                 sizeScale = scale
             )
             DisplayMode.UPLOAD_ONLY -> SpeedIconRenderer.render(
                 value = formattedUp.first,
                 unit = formattedUp.second,
+                decimalPlaces = decimalPlaces,
                 sizeScale = scale
             )
             DisplayMode.DOWNLOAD_AND_UPLOAD -> SpeedIconRenderer.renderCombined(
@@ -102,6 +105,7 @@ class NotificationHelper(private val context: Context) {
                 downUnit = formattedDown.second,
                 upValue = formattedUp.first,
                 upUnit = formattedUp.second,
+                decimalPlaces = decimalPlaces,
                 sizeScale = scale
             )
         }
