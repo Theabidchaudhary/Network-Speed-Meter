@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Network Speed Meter</string>
+    <string name="notification_channel_name">Speed meter status</string>
+    <string name="notification_channel_desc">Ongoing, silent status-bar icon showing live network speed. Required by Android to keep the meter running in the background.</string>
+    <string name="notification_text_running">Monitoring network speed</string>
+    <string name="notification_text_stopped">Speed meter inactive</string>
+</resources>
