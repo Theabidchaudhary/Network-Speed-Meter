@@ -28,6 +28,23 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = SettingsRepository(application)
     private val networkMonitor = NetworkMonitor(application)
 
+    init {
+        // Reconcile the foreground service with the persisted "enabled" flag every time this
+        // ViewModel is created (i.e. every time the app is opened), not just on user taps.
+        // Without this, a fresh install's default enabled=true left the switch showing ON while
+        // the service had actually never been started - nothing to toggle "on" from the user's
+        // point of view, so the meter silently never ran.
+        viewModelScope.launch {
+            repository.settingsFlow.map { it.enabled }.distinctUntilChanged().collect { enabled ->
+                if (enabled) {
+                    SpeedMeterService.start(getApplication<Application>())
+                } else {
+                    SpeedMeterService.stop(getApplication<Application>())
+                }
+            }
+        }
+    }
+
     val settings: StateFlow<AppSettings> = repository.settingsFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppSettings())
 
@@ -45,16 +62,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         settings.map { it.updateIntervalMillis }.distinctUntilChanged()
     ).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), SpeedSample(0, 0))
 
-    fun setEnabled(enabled: Boolean) {
-        viewModelScope.launch {
-            repository.setEnabled(enabled)
-            if (enabled) {
-                SpeedMeterService.start(getApplication<Application>())
-            } else {
-                SpeedMeterService.stop(getApplication<Application>())
-            }
-        }
-    }
+    fun setEnabled(enabled: Boolean) = viewModelScope.launch { repository.setEnabled(enabled) }
 
     fun restartService() {
         val app = getApplication<Application>()
