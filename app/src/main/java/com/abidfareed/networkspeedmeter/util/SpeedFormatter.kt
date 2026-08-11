@@ -4,56 +4,47 @@ import com.abidfareed.networkspeedmeter.settings.SpeedUnit
 import java.util.Locale
 import kotlin.math.pow
 
-/** Formats a bytes/sec rate into a compact, unit-labeled string using binary (1024) units. */
+/**
+ * Formats a bytes/sec rate into a compact, unit-labeled string using binary (1024) units.
+ * The smallest unit ever shown is KB/s - raw bytes/s are never displayed, so a near-idle
+ * connection reads as "0.0 KB/s" rather than "42 B/s".
+ */
 object SpeedFormatter {
 
     private const val STEP = 1024.0
-    private val UNIT_LABELS = listOf("B/s", "KB/s", "MB/s", "GB/s")
+    private val UNIT_LABELS = listOf("KB/s", "MB/s", "GB/s")
 
     fun format(bytesPerSec: Long, unit: SpeedUnit, decimalPlaces: Int): String {
+        val (magnitude, label) = scale(bytesPerSec, unit)
         val safeDecimals = decimalPlaces.coerceIn(0, 2)
-        val value = bytesPerSec.coerceAtLeast(0).toDouble()
-
-        val (magnitude, label) = if (unit == SpeedUnit.AUTO) {
-            autoScale(value)
-        } else {
-            val index = when (unit) {
-                SpeedUnit.B -> 0
-                SpeedUnit.KB -> 1
-                SpeedUnit.MB -> 2
-                SpeedUnit.GB -> 3
-                SpeedUnit.AUTO -> 0
-            }
-            (value / STEP.pow(index)) to UNIT_LABELS[index]
-        }
-
         return String.format(Locale.US, "%.${safeDecimals}f %s", magnitude, label)
     }
 
-    /** Same as [format] but without the unit suffix, for compact status-bar icon rendering. */
+    /** Same as [format] but returns (value, unit-without-"/s") for compact icon rendering. */
     fun formatCompact(bytesPerSec: Long, unit: SpeedUnit, decimalPlaces: Int): Pair<String, String> {
+        val (magnitude, label) = scale(bytesPerSec, unit)
         val safeDecimals = decimalPlaces.coerceIn(0, 2)
-        val value = bytesPerSec.coerceAtLeast(0).toDouble()
-
-        val (magnitude, label) = if (unit == SpeedUnit.AUTO) {
-            autoScale(value)
-        } else {
-            val index = when (unit) {
-                SpeedUnit.B -> 0
-                SpeedUnit.KB -> 1
-                SpeedUnit.MB -> 2
-                SpeedUnit.GB -> 3
-                SpeedUnit.AUTO -> 0
-            }
-            (value / STEP.pow(index)) to UNIT_LABELS[index]
-        }
-
-        val shortLabel = label.removeSuffix("/s")
-        return String.format(Locale.US, "%.${safeDecimals}f", magnitude) to shortLabel
+        return String.format(Locale.US, "%.${safeDecimals}f", magnitude) to label.removeSuffix("/s")
     }
 
-    private fun autoScale(bytesPerSec: Double): Pair<Double, String> {
-        var value = bytesPerSec
+    private fun scale(bytesPerSec: Long, unit: SpeedUnit): Pair<Double, String> {
+        val kbPerSec = bytesPerSec.coerceAtLeast(0).toDouble() / STEP
+
+        return if (unit == SpeedUnit.AUTO) {
+            autoScale(kbPerSec)
+        } else {
+            val index = when (unit) {
+                SpeedUnit.KB -> 0
+                SpeedUnit.MB -> 1
+                SpeedUnit.GB -> 2
+                SpeedUnit.AUTO -> 0
+            }
+            (kbPerSec / STEP.pow(index)) to UNIT_LABELS[index]
+        }
+    }
+
+    private fun autoScale(kbPerSec: Double): Pair<Double, String> {
+        var value = kbPerSec
         var index = 0
         while (value >= STEP && index < UNIT_LABELS.lastIndex) {
             value /= STEP

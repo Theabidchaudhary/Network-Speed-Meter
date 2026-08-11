@@ -2,7 +2,7 @@ package com.abidfareed.networkspeedmeter.settings
 
 enum class DisplayMode { DOWNLOAD_ONLY, UPLOAD_ONLY, DOWNLOAD_AND_UPLOAD }
 
-enum class SpeedUnit { AUTO, B, KB, MB, GB }
+enum class SpeedUnit { AUTO, KB, MB, GB }
 
 enum class NetworkFilter { BOTH, WIFI_ONLY, MOBILE_ONLY }
 

@@ -83,7 +83,7 @@ class SpeedMeterService : LifecycleService() {
             downloadBytesPerSec = 0,
             uploadBytesPerSec = 0,
             contentText = getString(com.abidfareed.networkspeedmeter.R.string.notification_text_running),
-            iconBitmap = SpeedIconRenderer.render(primary = "0B")
+            iconBitmap = SpeedIconRenderer.render(value = "0.0", unit = "KB")
         )
 
     private fun observeAndPublish() {
@@ -130,7 +130,7 @@ class SpeedMeterService : LifecycleService() {
         val formattedUp = SpeedFormatter.formatCompact(effectiveUp, settings.unit, settings.decimalPlaces)
 
         val icon = if (hideForIdle) {
-            SpeedIconRenderer.render(primary = "•", arrowDown = false)
+            SpeedIconRenderer.renderIdle()
         } else {
             notificationHelper.iconForSpeeds(
                 effectiveDown, effectiveUp, settings.displayMode, formattedDown, formattedUp, settings.textSize

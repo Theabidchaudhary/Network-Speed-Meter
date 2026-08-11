@@ -88,19 +88,20 @@ class NotificationHelper(private val context: Context) {
         }
         return when (displayMode) {
             DisplayMode.DOWNLOAD_ONLY -> SpeedIconRenderer.render(
-                primary = formattedDown.first + formattedDown.second.take(1),
-                arrowDown = true,
+                value = formattedDown.first,
+                unit = formattedDown.second,
                 sizeScale = scale
             )
             DisplayMode.UPLOAD_ONLY -> SpeedIconRenderer.render(
-                primary = formattedUp.first + formattedUp.second.take(1),
-                arrowDown = false,
-                arrowUp = true,
+                value = formattedUp.first,
+                unit = formattedUp.second,
                 sizeScale = scale
             )
-            DisplayMode.DOWNLOAD_AND_UPLOAD -> SpeedIconRenderer.render(
-                primary = formattedDown.first + formattedDown.second.take(1),
-                secondary = formattedUp.first + formattedUp.second.take(1),
+            DisplayMode.DOWNLOAD_AND_UPLOAD -> SpeedIconRenderer.renderCombined(
+                downValue = formattedDown.first,
+                downUnit = formattedDown.second,
+                upValue = formattedUp.first,
+                upUnit = formattedUp.second,
                 sizeScale = scale
             )
         }

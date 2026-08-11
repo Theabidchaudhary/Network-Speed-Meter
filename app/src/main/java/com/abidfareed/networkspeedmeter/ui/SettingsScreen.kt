@@ -184,7 +184,6 @@ private fun DisplayMode.label() = when (this) {
 
 private fun SpeedUnit.label() = when (this) {
     SpeedUnit.AUTO -> "Auto"
-    SpeedUnit.B -> "B/s"
     SpeedUnit.KB -> "KB/s"
     SpeedUnit.MB -> "MB/s"
     SpeedUnit.GB -> "GB/s"
